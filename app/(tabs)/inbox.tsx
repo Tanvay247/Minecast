@@ -1,10 +1,9 @@
 import { Text, View } from 'react-native';
 
-export default function HomeScreen() {
+export default function () {
   return (
     <View className="flex-1 items-center justify-center">
-      <Text>Home</Text>
+      <Text>Inbox</Text>
     </View>
   );
 }
-
