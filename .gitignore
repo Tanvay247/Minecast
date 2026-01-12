@@ -30,8 +30,11 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# Environment variables
+.env
+.env.*
+backend/.env
+backend/.env.*
 
 # typescript
 *.tsbuildinfo
@@ -41,3 +44,5 @@ app-example
 # generated native folders
 /ios
 /android
+
+/app/generated/prisma

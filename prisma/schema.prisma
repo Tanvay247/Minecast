@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model User {
+  id              String   @id                 // auth.users.id
+  walletAddress   String   @unique
+  role            UserRole @default(VIEWER)
+  createdAt       DateTime @default(now())
+
+  videos           Video[]
+  watchEvents      WatchEvent[]
+  rewards          RewardLedger[]
+  nftMintRequests  NFTMintRequest[]
+  transactions     Transaction[]
+  likes            Like[]
+  comments         Comment[]
+  shares           Share[]
+}
+
+enum UserRole {
+  VIEWER
+  CREATOR
+  VALIDATOR
+  ADMIN
+}
+
+model Video {
+  id            String   @id @default(uuid())
+  cid           String   @unique
+  creatorId     String
+  rarityScore   Float
+  rarityLabel   String
+  nftEligible   Boolean  @default(false)
+  nftMinted     Boolean  @default(false)
+  tokenId       BigInt?
+  createdAt     DateTime @default(now())
+
+  engagementId  String?  @unique
+  engagement    VideoEngagementStats? @relation(fields: [engagementId], references: [id])
+
+  creator          User   @relation(fields: [creatorId], references: [id])
+  watchEvents      WatchEvent[]
+  likes            Like[]
+  comments         Comment[]
+  shares           Share[]
+  nftMintRequests  NFTMintRequest[]
+
+  @@index([creatorId])
+  @@index([createdAt])
+}
+
+model VideoEngagementStats {
+  id           String  @id @default(uuid())
+  likeCount    Int     @default(0)
+  commentCount Int     @default(0)
+  shareCount   Int     @default(0)
+
+  video        Video?
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  videoId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+
+  @@unique([userId, videoId])
+  @@index([videoId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  userId    String
+  videoId   String
+  content   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+
+  @@index([videoId])
+}
+
+model Share {
+  id        String   @id @default(uuid())
+  userId    String
+  videoId   String
+  platform  String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+
+  @@unique([userId, videoId])
+}
+
+model WatchEvent {
+  id          String   @id @default(uuid())
+  userId      String
+  videoId     String
+  watchedSec  Int
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  video       Video    @relation(fields: [videoId], references: [id])
+
+  @@index([userId])
+  @@index([videoId])
+}
+
+model RewardLedger {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      BigInt              // mirrors ERC20 units
+  claimed     Boolean  @default(false)
+  txHash      String?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model NFTMintRequest {
+  id          String   @id @default(uuid())
+  videoId     String
+  creatorId   String
+  rarityScore Float
+  approved    Boolean  @default(false)
+  minted      Boolean  @default(false)
+  tokenId     BigInt?
+  createdAt   DateTime @default(now())
+
+  video       Video    @relation(fields: [videoId], references: [id])
+  creator     User     @relation(fields: [creatorId], references: [id])
+
+  @@unique([videoId])
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String
+  type      TxType
+  txHash    String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+}
+
+enum TxType {
+  REWARD_ASSIGN
+  REWARD_CLAIM
+  NFT_MINT
+  PAYMENT
+}
