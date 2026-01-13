@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+torch
+torchaudio
+transformers
+sentence-transformers
+opencv-python
+requests
+chromadb
+moviepy
+laion-clap

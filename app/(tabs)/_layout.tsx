@@ -5,52 +5,90 @@ import React from 'react';
 import { View } from 'react-native';
 
 export default function TabLayout() {
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#000',
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: 'black',
+          borderTopColor: '#222',
+        },
+        tabBarActiveTintColor: 'white',
+        tabBarInactiveTintColor: 'gray',
         tabBarLabelPosition: 'below-icon',
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ focused }) => <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color="black" />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'home' : 'home-outline'}
+              size={24}
+              color={color}
+            />
+          ),
         }}
       />
+
       <Tabs.Screen
         name="friends"
         options={{
           title: 'Friends',
-          tabBarIcon: ({ focused }) => <Ionicons name={focused ? "people" : "people-outline"} size={24} color="black" />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'people' : 'people-outline'}
+              size={24}
+              color={color}
+            />
+          ),
         }}
       />
+
       <Tabs.Screen
         name="camera"
         options={{
           title: '',
-          tabBarIcon: ({ focused }) => 
-            <View className="absolute">
-              <Ionicons name={focused ? "add-circle" : "add-outline"} size={54} color="black" />
-            </View>,
+          tabBarIcon: () => (
+            <View style={{ marginTop: 0 }}>
+              <Ionicons name="add-circle" size={56} color="white" />
+            </View>
+          ),
         }}
       />
+
       <Tabs.Screen
         name="inbox"
         options={{
           title: 'Inbox',
-          tabBarIcon: ({ focused }) => <MaterialCommunityIcons name={focused ? "message-processing" : "message-processing-outline"} size={24} color="black" />,
+          tabBarIcon: ({ focused, color }) => (
+            <MaterialCommunityIcons
+              name={
+                focused
+                  ? 'message-processing'
+                  : 'message-processing-outline'
+              }
+              size={24}
+              color={color}
+            />
+          ),
         }}
       />
+
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ focused }) => <Ionicons name={focused ? "person-circle" : "person-circle-outline"} size={24} color="black" />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'person-circle' : 'person-circle-outline'}
+              size={24}
+              color={color}
+            />
+          ),
         }}
       />
     </Tabs>
   );
-}
+} 

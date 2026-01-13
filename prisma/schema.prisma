@@ -14,19 +14,22 @@ datasource db {
 }
 
 model User {
-  id              String   @id                 // auth.users.id
-  walletAddress   String   @unique
-  role            UserRole @default(VIEWER)
-  createdAt       DateTime @default(now())
+  id            String   @id @default(uuid())
+  walletAddress String   @unique
+  role          UserRole @default(VIEWER)
+  createdAt     DateTime @default(now())
 
-  videos           Video[]
-  watchEvents      WatchEvent[]
-  rewards          RewardLedger[]
-  nftMintRequests  NFTMintRequest[]
-  transactions     Transaction[]
-  likes            Like[]
-  comments         Comment[]
-  shares           Share[]
+  videos        Video[]
+  watchEvents   WatchEvent[]
+  rewards       RewardLedger[]
+  nftMintRequests NFTMintRequest[]
+  transactions  Transaction[]
+  likes         Like[]
+  comments      Comment[]
+  shares        Share[]
+
+  followers     Follow[] @relation("Following")
+  following     Follow[] @relation("Follower")
 }
 
 enum UserRole {
@@ -34,6 +37,18 @@ enum UserRole {
   CREATOR
   VALIDATOR
   ADMIN
+}
+
+model Follow {
+  id           String   @id @default(uuid())
+  followerId   String
+  followingId  String
+  createdAt    DateTime @default(now())
+
+  follower     User @relation("Follower", fields: [followerId], references: [id])
+  following    User @relation("Following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
 }
 
 model Video {
