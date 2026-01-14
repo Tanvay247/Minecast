@@ -1,7 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from 'expo-router';
-import React from 'react';
 import { View } from 'react-native';
 
 export default function TabLayout() {
@@ -9,19 +8,14 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: 'black',
-          borderTopColor: '#222',
-        },
-        tabBarActiveTintColor: 'white',
-        tabBarInactiveTintColor: 'gray',
-        tabBarLabelPosition: 'below-icon',
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: '#ff0050',   // active (MineCast pink)
+        tabBarInactiveTintColor: '#888',    // inactive
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
@@ -33,12 +27,11 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="friends"
+        name="wallet"
         options={{
-          title: 'Friends',
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
-              name={focused ? 'people' : 'people-outline'}
+              name={focused ? 'wallet' : 'wallet-outline'}
               size={24}
               color={color}
             />
@@ -49,10 +42,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="camera"
         options={{
-          title: '',
-          tabBarIcon: () => (
-            <View style={{ marginTop: 0 }}>
-              <Ionicons name="add-circle" size={56} color="white" />
+          tabBarIcon: ({ focused, color }) => (
+            <View style={{ marginBottom: 18 }}>
+              <Ionicons
+                name={focused ? 'add-circle' : 'add-circle-outline'}
+                size={54}
+                color={color}
+              />
             </View>
           ),
         }}
@@ -61,7 +57,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="inbox"
         options={{
-          title: 'Inbox',
           tabBarIcon: ({ focused, color }) => (
             <MaterialCommunityIcons
               name={
@@ -79,10 +74,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
-              name={focused ? 'person-circle' : 'person-circle-outline'}
+              name={focused ? 'person' : 'person-outline'}
               size={24}
               color={color}
             />
@@ -91,4 +85,4 @@ export default function TabLayout() {
       />
     </Tabs>
   );
-} 
+}

@@ -1,79 +1,49 @@
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  View,
-} from "react-native";
-import { supabase } from "../../utils/supabase";
+import { Alert, Button, Platform, View } from "react-native";
 
-const UPLOAD_API = "http://localhost:4000/video/upload";
-
-export default function CameraScreen() {
-  const [uploading, setUploading] = useState(false);
-
-  const pickVideo = async (): Promise<string | null> => {
+export default function Camera() {
+  const uploadVideo = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      quality: 1,
     });
 
-    if (result.canceled) return null;
-    return result.assets[0].uri;
-  };
+    if (result.canceled) return;
 
-  const handleUpload = async () => {
-    try {
-      setUploading(true);
+    const video = result.assets[0];
 
-      // 1️⃣ Pick video
-      const videoUri = await pickVideo();
-      if (!videoUri) return;
+    const formData = new FormData();
+    formData.append("video", {
+      uri: video.uri,
+      name: "video.mp4",
+      type: "video/mp4",
+    } as any);
 
-      // 2️⃣ Get user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    formData.append("userId", "test-user-1");
 
-      if (!user) throw new Error("User not logged in");
+    const API_URL =
+      Platform.OS === "web"
+        ? "http://localhost:4000"
+        : "http://10.125.178.53:4000";
 
-      // 3️⃣ Build FormData (WEB SAFE)
-      const formData = new FormData();
-      formData.append("video", {
-        uri: videoUri,
-        type: "video/mp4",
-        name: "video.mp4",
-      } as any);
+    const res = await fetch(`${API_URL}/video/upload`, {
+      method: "POST",
+      body: formData,
+    });
 
-      formData.append("userId", user.id);
+    const text = await res.text();
 
-      // 4️⃣ Upload
-      const res = await fetch(UPLOAD_API, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
-      }
-
-      Alert.alert("Success", "Video uploaded 🚀");
-    } catch (err: any) {
-      console.error(err);
-      Alert.alert("Upload failed", err.message);
-    } finally {
-      setUploading(false);
+    if (!res.ok) {
+      Alert.alert("Upload failed", text);
+      return;
     }
+
+    Alert.alert("Uploaded!", "Video uploaded successfully");
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      {uploading ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <Button title="Upload Video" onPress={handleUpload} />
-      )}
+    <View className="flex-1 items-center justify-center">
+      <Button title="Pick & Upload Video" onPress={uploadVideo} />
     </View>
   );
 }

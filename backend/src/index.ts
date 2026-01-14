@@ -1,27 +1,31 @@
-import dotenv from 'dotenv';
-import path from 'path';
+import cors from "cors";
+import express from "express";
 
-const envPath = path.resolve(process.cwd(), '.env');
-dotenv.config({ path: envPath });
-
-import cors from 'cors';
-import express from 'express';
-
-import authRoutes from './api/auth';
-import engagementRoutes from './api/engagement';
-import videoRoutes from './api/video';
+import authRoutes from "./api/auth";
+import engagementRoutes from "./api/engagement";
+import videoRoutes from "./api/video";
+import videoFeedRouter from "./api/videoFeed";
 
 const app = express();
 
-app.use(cors());
+// Middleware
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  })
+);
 app.use(express.json());
 
-app.use('/auth', authRoutes);
-app.use('/video', videoRoutes);
-app.use('/engagement', engagementRoutes);
+// Routes
+app.use("/auth", authRoutes);
+app.use("/video", videoRoutes);
+app.use("/api/video", videoFeedRouter);
+app.use("/engagement", engagementRoutes);
 
-const PORT = process.env.PORT || 4000;
+// Start server (IMPORTANT: 0.0.0.0)
+const PORT = Number(process.env.PORT) || 4000;
 
-app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Backend running on http://0.0.0.0:${PORT}`);
 });

@@ -1,95 +1,130 @@
-import { supabase } from '@/utils/supabase';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { supabase } from "@/utils/supabase";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Button, Text, TextInput } from "react-native-paper";
 
-export default function () {
-  const [email,setEmail] = useState('');
-  const [password,setPassword] = useState('');
+export default function Login() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
-  
-  const handleLogin = async () => {
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const login = async () => {
     if (!email || !password) {
-      Alert.alert('Missing fields', 'Please enter email and password');
+      setErrorMsg("Email and password are required");
       return;
     }
 
     setLoading(true);
+    setErrorMsg(null);
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        Alert.alert('Login Failed', error.message);
-        return;
-      }
+    console.log("LOGIN RESPONSE:", { data, error });
 
-      if (data?.user) {
-        const res = await fetch('http://localhost:4000/auth/sync-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: data.user.id,
-          walletAddress: '0xTEMP',
-        }),
-        });
+    setLoading(false);
 
-        if (!res.ok) {
-          const text = await res.text();
-          console.error('SYNC USER FAILED:', text);
-          throw new Error('User sync failed');
-        }
-
-        router.replace('/');
-      }
-    } catch (err) {
-      Alert.alert(
-        'Error',
-        err instanceof Error ? err.message : 'Unexpected error'
-      );
-    } finally {
-      setLoading(false);
+    if (error) {
+      setErrorMsg(error.message);
+      return;
     }
+
+    if (!data.session) {
+      setErrorMsg("Login failed. Please verify your email.");
+      return;
+    }
+
+    // ✅ SUCCESS
+    // RootLayout will auto-redirect to /(tabs)
   };
 
   return (
-    <View className="flex-1 items-center justify-center">
-      <View className='w-full p-4'>
-        <Text className='text-black font-bold text-3xl text-center mb-4'>Login</Text>
-        <TextInput 
-        className='bg-white p-4 rounded-lg border border-gray-300 w-full mb-4' 
+    <View style={styles.container}>
+      <Text style={styles.logo}>MineCast</Text>
+      <Text style={styles.subtitle}>Watch. Earn. Mine.</Text>
+
+      {errorMsg && (
+        <Text style={styles.error}>{errorMsg}</Text>
+      )}
+
+      <TextInput
+        mode="outlined"
+        placeholder="Email"
         value={email}
         onChangeText={setEmail}
-        placeholder='email'
-        />
-        <TextInput 
-        secureTextEntry={true} 
-        className='bg-white p-4 rounded-lg border border-gray-300 w-full mb-4'
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={styles.input}
+      />
+
+      <TextInput
+        mode="outlined"
+        placeholder="Password"
+        secureTextEntry
         value={password}
-        onChangeText={setPassword} 
-        placeholder='password'
-        />
-        <TouchableOpacity
-          className="bg-black p-4 rounded-lg"
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text className='text-white font-bold text-center'>Login</Text>
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity 
-        onPress={() => router.push('/(auth)/signup')}
-        >
-         <Text className='text-black font-semibold text-center mt-3'>Signup</Text>
-        </TouchableOpacity>
-        
-      </View>
+        onChangeText={setPassword}
+        style={styles.input}
+      />
+
+      <Button
+        mode="contained"
+        onPress={login}
+        loading={loading}
+        disabled={loading}
+        style={styles.button}
+      >
+        Log In
+      </Button>
+
+      <Button
+        mode="text"
+        textColor="#aaa"
+        onPress={() => router.push("/(auth)/signup")}
+      >
+        Don’t have an account? Sign up
+      </Button>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+    padding: 24,
+    justifyContent: "center",
+  },
+  logo: {
+    color: "#fff",
+    fontSize: 36,
+    fontWeight: "800",
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: "#aaa",
+    textAlign: "center",
+    marginBottom: 32,
+  },
+  input: {
+    marginBottom: 12,
+    backgroundColor: "#111",
+  },
+  button: {
+    marginTop: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  error: {
+    color: "#ff4444",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+});
