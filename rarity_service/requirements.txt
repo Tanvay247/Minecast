@@ -1,10 +1,6 @@
 fastapi
 uvicorn
 
-torch==2.6.0
-torchvision==0.21.0
-torchaudio==2.6.0
-
 transformers
 sentence-transformers
 laion-clap
